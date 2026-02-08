@@ -19,13 +19,17 @@ def upload_file():
     if "file" not in request.files:
         return "No file", 400
 
-    file = request.files["file"]
-    if file.filename == "":
+    files = request.files.getlist("file")
+
+    if not files or files[0].filename == "":
         return "Empty filename", 400
 
-    filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+    for file in files:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
     return ("", 204)
+
 
 @app.route("/download/<filename>")
 def download_file(filename):
