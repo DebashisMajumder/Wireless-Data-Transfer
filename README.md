@@ -1,4 +1,4 @@
-# 📂 Wireless File Share (Raspberry Pi Zero 2 W)
+# 📂 Wireless Data Transfer (Raspberry Pi)
 
 A lightweight **wireless file sharing web server** built using **Flask**, designed and tested on a **Raspberry Pi Zero 2 W**.  
 It allows you to upload, download, and delete files over your **local Wi-Fi network** using any modern web browser — no USB cables, no extra apps.
@@ -58,27 +58,37 @@ Wireless-File-Share/
 ```bash
 
 sudo apt update && sudo apt upgrade -y
+```
 
-2️⃣ Install Python & pip (if not installed)
+# 2️⃣ Install Python & pip (if not installed)
+```
 sudo apt install python3 python3-pip -y
+```
 
 3️⃣ Install Flask
+```
 pip3 install flask
+```
 
 ▶️ Running the Server
 1️⃣ Clone or copy the project
+```
 git clone https://github.com/yourusername/wireless-file-share.git
 cd wireless-file-share
+```
 
 
 (Or manually copy files to your Pi.)
 
 2️⃣ Create uploads directory
+```
 mkdir -p uploads
+```
 
 3️⃣ Run the server
+```
 python3 app.py
-
+```
 
 You should see:
 
@@ -91,9 +101,9 @@ http://localhost:5000
 From another device (phone / laptop):
 
 Find the Pi’s IP address:
-
+```
 hostname -I
-
+```
 
 Open in browser:
 
