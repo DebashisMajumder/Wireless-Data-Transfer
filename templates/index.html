@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wireless File Share</title>
+<title>Wireless Data Transfer</title>
 
 <style>
 :root{
@@ -11,7 +11,7 @@
   --card:#2a2b2f;
   --border:#3a3b40;
   --text:#f2f2f2;
-  --accent:#3ddc97;   /* human-liked soft green */
+  --accent:#3ddc97;
   --danger:#ff5c5c;
 }
 body.light{
@@ -21,22 +21,14 @@ body.light{
   --text:#1e1f22;
   --accent:#20bfa8;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:system-ui,sans-serif;
   background:var(--bg);
   color:var(--text);
-  min-height:100vh;
 }
-
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:16px;
-}
+.container{max-width:1100px;margin:auto;padding:16px}
 
 /* TOP BAR */
 .topbar{
@@ -45,11 +37,7 @@ body{
   align-items:center;
   margin-bottom:16px;
 }
-.top-actions{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
+.top-actions{display:flex;gap:10px;align-items:center}
 .icon-btn{
   padding:6px 14px;
   border-radius:999px;
@@ -61,51 +49,22 @@ body{
 
 /* MODE SWITCH */
 .mode-switch{
-  position:relative;
-  width:170px;
-  height:44px;
-  border-radius:999px;
-  background:#000;
-  display:flex;
-  align-items:center;
-  cursor:pointer;
-  padding:4px;
-  transition:background .3s;
+  width:170px;height:44px;border-radius:999px;
+  background:#000;display:flex;align-items:center;
+  cursor:pointer;padding:4px;
 }
-
 .mode-switch .knob{
-  width:36px;
-  height:36px;
-  background:#fff;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  transition:transform .3s;
+  width:36px;height:36px;border-radius:50%;
+  background:#fff;display:flex;
+  align-items:center;justify-content:center;
+  transition:.3s;
 }
-
 .mode-switch .mode-text{
-  color:#fff;
-  font-weight:600;
-  margin-left:12px;
-  transition:color .3s;
+  color:#fff;font-weight:600;margin-left:12px;
 }
-
-body.light .mode-switch{
-  background:#e5e5e5;
-}
-
-body.light .mode-switch .knob{
-  transform:translateX(122px);
-}
-
-body.light .mode-switch .mode-text{
-  color:#000;
-}
-
-body.light #modeIcon{content:"☀️"}
-
+body.light .mode-switch{background:#e5e5e5}
+body.light .mode-switch .knob{transform:translateX(122px)}
+body.light .mode-switch .mode-text{color:#000}
 
 /* UPLOAD */
 .upload{
@@ -113,102 +72,59 @@ body.light #modeIcon{content:"☀️"}
   border:1px solid var(--border);
   border-radius:16px;
   padding:20px;
-  margin-bottom:16px;
 }
 .upload label{
-  display:block;
-  border:2px dashed var(--border);
-  padding:24px;
-  border-radius:12px;
-  text-align:center;
-  cursor:pointer;
+  display:block;border:2px dashed var(--border);
+  padding:24px;border-radius:12px;
+  text-align:center;cursor:pointer;
 }
 .upload input{display:none}
-
-.filename{
-  margin-top:8px;
-  font-size:.9rem;
-  opacity:.8;
-}
-
+.filename{margin-top:8px;font-size:.9rem;opacity:.8}
 .progress{
-  height:8px;
-  background:var(--border);
-  border-radius:999px;
-  overflow:hidden;
-  margin-top:12px;
-  display:none;
+  height:8px;background:var(--border);
+  border-radius:999px;overflow:hidden;
+  margin-top:12px;display:none;
 }
-.progress span{
-  height:100%;
-  width:0%;
-  display:block;
-  background:var(--accent);
-}
-
+.progress span{height:100%;width:0%;background:var(--accent);display:block}
 button{
   background:var(--accent);
-  border:none;
-  padding:8px 20px;
-  border-radius:8px;
-  margin-top:12px;
-  cursor:pointer;
+  border:none;padding:8px 20px;
+  border-radius:8px;margin-top:12px;
 }
 
 /* FILE LIST */
 .file{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:var(--card);
+  display:flex;justify-content:space-between;
+  align-items:center;background:var(--card);
   border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  margin-top:10px;
+  border-radius:12px;padding:12px;margin-top:10px;
 }
-.file a{
-  color:var(--accent);
-  text-decoration:none;
-  word-break:break-all;
-}
+.file a{color:var(--accent);text-decoration:none}
 .delete{
   border:1px solid var(--danger);
-  color:var(--danger);
-  background:none;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
+  color:var(--danger);background:none;
+  padding:6px 10px;border-radius:8px;
 }
 
 /* STORAGE */
 .storage-panel{
-  position:fixed;
-  right:16px;
-  top:80px;
+  position:fixed;right:16px;top:80px;
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px;
-  width:240px;
-  display:none;
-  z-index:20;
+  border-radius:16px;padding:16px;
+  width:240px;display:none;
 }
 .storage-panel.show{display:block}
-
 .meter{
   width:140px;height:70px;
   border-radius:140px 140px 0 0;
   background:var(--border);
-  margin:10px auto;
-  position:relative;
+  margin:10px auto;position:relative;
 }
 .needle{
-  width:2px;height:70px;
-  background:var(--accent);
-  position:absolute;
-  left:50%;bottom:0;
+  width:2px;height:70px;background:var(--accent);
+  position:absolute;left:50%;bottom:0;
   transform-origin:bottom;
-  transform:rotate(-90deg);
 }
 
 /* QR BUTTON ICON */
@@ -259,12 +175,6 @@ body.light .qr-btn{
   color: var(--accent);
 }
 
-
-/* MOBILE */
-@media(max-width:600px){
-  .file{flex-direction:column;align-items:flex-start;gap:6px}
-  .storage-panel{width:90%;right:5%}
-}
 </style>
 </head>
 
@@ -272,7 +182,7 @@ body.light .qr-btn{
 <div class="container">
 
 <div class="topbar">
-  <strong>📂 Wireless File Share</strong>
+  <strong>📂 WDT</strong>
   <div class="top-actions">
   
     <button class="icon-btn" onclick="toggleStorage()" title="Storage">
@@ -297,25 +207,20 @@ body.light .qr-btn{
             stroke-linecap="round"/>
       </svg>
     </div>
-
-    
-    <div class="mode-switch" onclick="toggleTheme()" id="modeSwitch">
-      <div class="knob">
-        <span id="modeIcon">🌙</span>
-      </div>
-      <span class="mode-text" id="modeText">NIGHT MODE</span>
+    <div class="mode-switch" onclick="toggleTheme()">
+      <div class="knob"><span id="modeIcon">🌙</span></div>
+      <span class="mode-text" id="modeText">Dark</span>
     </div>
-
   </div>
 </div>
 
 <div class="upload">
 <form id="uploadForm" enctype="multipart/form-data">
   <label>
-    Choose or drop a file
-    <input type="file" name="file" id="fileInput" required>
+    Choose or drop files
+    <input type="file" id="fileInput" name="file" multiple required>
+    <div class="filename" id="filename">No file selected</div>
   </label>
-  <div class="filename" id="filename">No file selected</div>
   <div class="progress"><span id="bar"></span></div>
   <button>Upload</button>
 </form>
@@ -347,14 +252,17 @@ body.light .qr-btn{
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
+const uploadForm=document.getElementById("uploadForm");
 const bar=document.getElementById("bar");
 const fileInput=document.getElementById("fileInput");
 const filename=document.getElementById("filename");
-let refreshTimer=null;
 
 /* FILE NAME */
 fileInput.onchange=()=>{
-  filename.textContent=fileInput.files[0]?.name || "No file selected";
+  filename.textContent =
+    fileInput.files.length === 1
+      ? fileInput.files[0].name
+      : `${fileInput.files.length} files selected`;
 };
 
 /* UPLOAD */
@@ -373,16 +281,13 @@ uploadForm.onsubmit=e=>{
 /* THEME */
 function toggleTheme(){
   document.body.classList.toggle("light");
-
-  const isLight = document.body.classList.contains("light");
-  modeText.textContent = isLight ? "DAY MODE" : "NIGHT MODE";
-  modeIcon.textContent = isLight ? "☀️" : "🌙";
+  const light=document.body.classList.contains("light");
+  modeText.textContent=light?"LIGHT MODE":"NIGHT MODE";
+  modeIcon.textContent=light?"☀️":"🌙";
 }
 
 /* STORAGE */
-function toggleStorage(){
-  storage.classList.toggle("show");
-}
+function toggleStorage(){storage.classList.toggle("show")}
 
 /* QR */
 function toggleQR(){
@@ -391,23 +296,8 @@ function toggleQR(){
   new QRCode(qr,{text:location.href,width:180,height:180});
 }
 
-/* AUTO REFRESH EVERY 8 SECONDS */
-setInterval(() => {
-  fetch("/stats")
-    .then(r => r.json())
-    .then(d => {
-      const pct = Math.min(1, d.used / d.total);
-      needle.style.transform = `rotate(${pct * 180 - 90}deg)`;
-      storageText.textContent =
-        `${(d.used / 1e9).toFixed(2)} GB / ${(d.total / 1e9).toFixed(2)} GB`;
-    });
-
-  fetch(window.location.href, { method: "HEAD" })
-    .then(() => location.reload());
-}, 8000);
-
-/* STORAGE STATS */
-async function loadStats(){
+/* STORAGE AUTO UPDATE */
+async function updateStats(){
   const r=await fetch("/stats");
   const d=await r.json();
   const pct=d.used/d.total;
@@ -415,7 +305,9 @@ async function loadStats(){
   storageText.textContent=
     `${(d.used/1e9).toFixed(2)} GB / ${(d.total/1e9).toFixed(2)} GB`;
 }
-loadStats();
+updateStats();
+setInterval(updateStats,5000);
 </script>
+
 </body>
 </html>
