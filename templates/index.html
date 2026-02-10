@@ -1,0 +1,703 @@
+{% extends "base.html" %}
+
+{% block title %}WDT - Wireless Data Transfer{% endblock %}
+
+{% block styles %}
+<style>
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .topbar h1 {
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .top-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .icon-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .icon-btn:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+    
+    .theme-toggle {
+        font-size: 20px;
+    }
+    
+    /* Mode Switch */
+    .transfer-mode {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .mode-btn {
+        padding: 14px;
+        border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 15px;
+    }
+    
+    .mode-btn:hover {
+        border-color: var(--accent);
+    }
+    
+    .mode-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+    }
+    
+    /* Upload Area */
+    .upload-area {
+        background: var(--card);
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 20px;
+    }
+    
+    .upload-area:hover,
+    .upload-area.dragover {
+        border-color: var(--accent);
+        background: rgba(61, 220, 151, 0.05);
+    }
+    
+    .upload-area svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        opacity: 0.6;
+    }
+    
+    .upload-area h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+    }
+    
+    .upload-area p {
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+    
+    #fileInput {
+        display: none;
+    }
+    
+    .file-list {
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 16px;
+        display: none;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: var(--accent);
+        width: 0%;
+        transition: width 0.3s;
+    }
+    
+    .upload-btn {
+        margin-top: 16px;
+        display: none;
+    }
+    
+    /* Files Grid */
+    .files-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+    }
+    
+    .file-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+    
+    .file-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .file-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(61, 220, 151, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .file-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .file-name {
+        font-weight: 600;
+        word-break: break-word;
+        margin-bottom: 4px;
+        color: var(--accent);
+        text-decoration: none;
+        display: block;
+    }
+    
+    .file-name:hover {
+        text-decoration: underline;
+    }
+    
+    .file-meta {
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .file-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    
+    .file-actions form {
+        flex: 1;
+    }
+    
+    .file-actions button {
+        width: 100%;
+    }
+    
+    /* QR Popup */
+    .qr-popup {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 20px;
+    }
+    
+    .qr-popup.show {
+        display: flex;
+    }
+    
+    .qr-box {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+    }
+    
+    .qr-box h2 {
+        margin-bottom: 20px;
+    }
+    
+    #qrcode {
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .qr-url {
+        background: var(--bg);
+        padding: 12px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        word-break: break-all;
+        margin: 16px 0;
+    }
+    
+    /* Storage Panel */
+    .storage-panel {
+        position: fixed;
+        right: 20px;
+        top: 100px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        width: 280px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 100;
+    }
+    
+    .storage-panel.show {
+        display: block;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    .storage-meter {
+        width: 160px;
+        height: 80px;
+        border-radius: 160px 160px 0 0;
+        background: var(--border);
+        margin: 20px auto;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .storage-fill {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--accent);
+        transition: height 0.5s ease;
+    }
+    
+    .storage-text {
+        text-align: center;
+        font-size: 14px;
+        margin-top: 12px;
+    }
+    
+    .storage-text strong {
+        display: block;
+        font-size: 24px;
+        color: var(--accent);
+        margin-bottom: 4px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
+    
+    @media (max-width: 768px) {
+        .files-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .storage-panel {
+            right: 12px;
+            left: 12px;
+            width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Top Bar -->
+    <div class="topbar">
+        <h1>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Wireless Data Transfer
+        </h1>
+        
+        <div class="top-actions">
+            <button class="icon-btn" onclick="toggleStorage()" title="Storage Info">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <ellipse cx="12" cy="5" rx="9" ry="3" stroke-width="2"/>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke-width="2"/>
+                    <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" stroke-width="2"/>
+                </svg>
+            </button>
+            
+            <a href="/admin/login" class="icon-btn" title="Admin Panel">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke-width="2"/>
+                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke-width="2"/>
+                </svg>
+            </a>
+            
+            <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mode Selection -->
+    <div class="transfer-mode">
+        <button id="modeGeneral" class="mode-btn active" onclick="setMode('general')">
+            📁 General Upload
+        </button>
+        <button id="modeSecure" class="mode-btn" onclick="setMode('secure')">
+            🔒 Secure Upload
+        </button>
+    </div>
+    
+    <!-- Upload Area -->
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="upload-area" id="uploadArea">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>Drop files here or click to browse</h3>
+            <p id="uploadHint">Upload files to general storage</p>
+            <input type="file" id="fileInput" name="file" multiple>
+            <div class="file-list" id="fileList"></div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary upload-btn" id="uploadBtn">Upload Files</button>
+    </form>
+    
+    <!-- Files Section -->
+    {% if files %}
+        <h2 style="margin: 30px 0 16px 0;">📂 Available Files</h2>
+        <div class="files-grid">
+            {% for file in files %}
+            <div class="file-card">
+                <div class="file-header">
+                    <div class="file-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke-width="2"/>
+                            <polyline points="13 2 13 9 20 9" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="file-info">
+                        <a href="/download/{{ file.name }}" class="file-name">{{ file.name }}</a>
+                        <div class="file-meta">
+                            <span>📦 {{ file.size }}</span>
+                            <span>📅 {{ file.uploaded }}</span>
+                            <span class="expiry" data-seconds="{{ file.expires_in }}">⏱ Calculating...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <form method="post" action="/delete/{{ file.name }}" onsubmit="return confirm('Delete this file?')">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-width="2"/>
+            </svg>
+            <h3>No files yet</h3>
+            <p>Upload your first file to get started</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Storage Panel -->
+<div class="storage-panel" id="storagePanel">
+    <h3>💾 Storage Info</h3>
+    <div class="storage-meter">
+        <div class="storage-fill" id="storageFill"></div>
+    </div>
+    <div class="storage-text">
+        <strong id="storagePercent">0%</strong>
+        <div id="storageDetails">Loading...</div>
+    </div>
+    <button class="btn btn-secondary" onclick="toggleStorage()" style="width: 100%; margin-top: 16px;">Close</button>
+</div>
+
+<!-- QR Popup -->
+<div class="qr-popup" id="qrPopup">
+    <div class="qr-box">
+        <h2>🔒 Secure Upload Complete</h2>
+        <p>Scan this QR code to access your files</p>
+        <div id="qrcode"></div>
+        <div class="qr-url" id="qrUrl"></div>
+        <button class="btn btn-primary" onclick="closeQR()">Close</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/qrcode.min.js"></script>
+<script>
+    let uploadMode = 'general';
+    let selectedFiles = [];
+    
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const uploadHint = document.getElementById('uploadHint');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const qrPopup = document.getElementById('qrPopup');
+    
+    // Mode switching
+    function setMode(mode) {
+        uploadMode = mode;
+        document.getElementById('modeGeneral').classList.toggle('active', mode === 'general');
+        document.getElementById('modeSecure').classList.toggle('active', mode === 'secure');
+        uploadHint.textContent = mode === 'secure' 
+            ? '🔒 Files will be accessible via QR code only'
+            : 'Upload files to general storage';
+    }
+    
+    // File selection
+    uploadArea.onclick = () => fileInput.click();
+    
+    fileInput.onchange = (e) => {
+        selectedFiles = Array.from(e.target.files);
+        updateFileList();
+    };
+    
+    function updateFileList() {
+        if (selectedFiles.length === 0) {
+            fileList.innerHTML = '';
+            uploadBtn.style.display = 'none';
+            return;
+        }
+        
+        fileList.innerHTML = `<strong>${selectedFiles.length} file(s) selected:</strong><br>` +
+            selectedFiles.map(f => `• ${f.name} (${formatSize(f.size)})`).join('<br>');
+        uploadBtn.style.display = 'block';
+    }
+    
+    // Drag and drop
+    uploadArea.ondragover = (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    };
+    
+    uploadArea.ondragleave = () => {
+        uploadArea.classList.remove('dragover');
+    };
+    
+    uploadArea.ondrop = (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        selectedFiles = Array.from(e.dataTransfer.files);
+        updateFileList();
+    };
+    
+    // Upload
+    uploadForm.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        if (selectedFiles.length === 0) return;
+        
+        const endpoint = uploadMode === 'secure' ? '/upload_secure' : '/upload';
+        const formData = new FormData();
+        selectedFiles.forEach(file => formData.append('file', file));
+        
+        progressBar.style.display = 'block';
+        uploadBtn.disabled = true;
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                const percent = (e.loaded / e.total) * 100;
+                progressFill.style.width = percent + '%';
+            }
+        };
+        
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                if (uploadMode === 'secure') {
+                    const response = JSON.parse(xhr.responseText);
+                    showQR(response.token);
+                } else {
+                    location.reload();
+                }
+            } else {
+                alert('Upload failed: ' + xhr.statusText);
+            }
+            
+            progressBar.style.display = 'none';
+            progressFill.style.width = '0%';
+            uploadBtn.disabled = false;
+        };
+        
+        xhr.onerror = () => {
+            alert('Upload failed');
+            progressBar.style.display = 'none';
+            uploadBtn.disabled = false;
+        };
+        
+        xhr.open('POST', endpoint);
+        xhr.send(formData);
+    };
+    
+    // QR Code
+    function showQR(token) {
+        const url = `${location.origin}/secure/${token}`;
+        qrPopup.classList.add('show');
+        
+        const qrcodeDiv = document.getElementById('qrcode');
+        qrcodeDiv.innerHTML = '';
+        
+        new QRCode(qrcodeDiv, {
+            text: url,
+            width: 200,
+            height: 200,
+            colorDark: "#3ddc97",
+            colorLight: "#1c1f26",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        document.getElementById('qrUrl').textContent = url;
+    }
+    
+    function closeQR() {
+        qrPopup.classList.remove('show');
+        location.reload();
+    }
+    
+    qrPopup.onclick = (e) => {
+        if (e.target === qrPopup) closeQR();
+    };
+    
+    // Storage panel
+    function toggleStorage() {
+        const panel = document.getElementById('storagePanel');
+        panel.classList.toggle('show');
+        
+        if (panel.classList.contains('show')) {
+            fetchStorage();
+        }
+    }
+    
+    async function fetchStorage() {
+        try {
+            const response = await fetch('/stats');
+            const data = await response.json();
+            
+            const percent = data.percent || 0;
+            document.getElementById('storageFill').style.height = percent + '%';
+            document.getElementById('storagePercent').textContent = percent.toFixed(1) + '%';
+            document.getElementById('storageDetails').textContent = 
+                `${formatSize(data.used)} of ${formatSize(data.total)} used`;
+        } catch (error) {
+            console.error('Failed to fetch storage:', error);
+        }
+    }
+    
+    // Utilities
+    function formatSize(bytes) {
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let size = bytes;
+        let unitIndex = 0;
+        
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+        
+        return size.toFixed(2) + ' ' + units[unitIndex];
+    }
+    
+    function formatTime(seconds) {
+        if (seconds <= 0) return '⏱ Expired';
+        
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        
+        return `⏱ ${hours}h ${minutes}m ${secs}s`;
+    }
+    
+    // Expiry countdown
+    document.querySelectorAll('.expiry').forEach(el => {
+        let remaining = parseInt(el.dataset.seconds);
+        
+        function updateExpiry() {
+            el.textContent = formatTime(remaining);
+            remaining--;
+            
+            if (remaining < 0) {
+                location.reload();
+            }
+        }
+        
+        updateExpiry();
+        setInterval(updateExpiry, 1000);
+    });
+    
+    // Theme
+    function toggleTheme() {
+        const isDark = !document.body.classList.contains('light');
+        document.body.classList.toggle('light');
+        document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    
+    // Load theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+</script>
+{% endblock %}

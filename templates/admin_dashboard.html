@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .stat-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+    
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 4px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+    
+    /* Ledger Table */
+    .ledger-container {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .ledger-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .ledger-header h2 {
+        font-size: 20px;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+        max-height: 600px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    
+    thead {
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        z-index: 10;
+    }
+    
+    th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid var(--border);
+        white-space: nowrap;
+    }
+    
+    td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+    }
+    
+    tbody tr:hover {
+        background: rgba(61, 220, 151, 0.05);
+    }
+    
+    /* Event badges */
+    .event-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .event-UPLOAD,
+    .event-UPLOAD_SECURE {
+        background: rgba(61, 220, 151, 0.2);
+        color: #3ddc97;
+    }
+    
+    .event-DOWNLOAD,
+    .event-DOWNLOAD_SECURE {
+        background: rgba(78, 161, 255, 0.2);
+        color: #4ea1ff;
+    }
+    
+    .event-DELETE,
+    .event-DELETE_SECURE,
+    .event-AUTO_DELETE {
+        background: rgba(255, 92, 92, 0.2);
+        color: #ff5c5c;
+    }
+    
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+    
+    .filter-bar {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-bar input {
+        flex: 1;
+        min-width: 200px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+    }
+    
+    .filter-bar input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .header-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+        
+        .header-actions .btn {
+            width: 100%;
+        }
+        
+        table {
+            font-size: 11px;
+        }
+        
+        th, td {
+            padding: 8px 12px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="3" width="7" height="7" stroke-width="2" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" stroke-width="2" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" stroke-width="2" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" stroke-width="2" rx="1"/>
+            </svg>
+            Admin Dashboard
+        </h1>
+        
+        <div class="header-actions">
+            <a href="/admin/export" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Export CSV
+            </a>
+            <a href="/admin/logout" class="btn btn-danger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Logout
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    {% if stats %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">💾</div>
+            <div class="stat-value">{{ stats.percent|round(1) }}%</div>
+            <div class="stat-label">Storage Used</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value">{{ rows|length }}</div>
+            <div class="stat-label">Total Events</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-value" id="uploadCount">0</div>
+            <div class="stat-label">Uploads</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⬇️</div>
+            <div class="stat-value" id="downloadCount">0</div>
+            <div class="stat-label">Downloads</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Activity Ledger -->
+    <div class="ledger-container">
+        <div class="ledger-header">
+            <h2>📋 Activity Ledger</h2>
+        </div>
+        
+        <div class="filter-bar">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="🔍 Search files, events, MACs, tokens..."
+                onkeyup="filterTable()"
+            >
+        </div>
+        
+        {% if rows %}
+            <div class="table-wrapper">
+                <table id="ledgerTable">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Event</th>
+                            <th>File</th>
+                            <th>Uploader MAC</th>
+                            <th>Downloader MAC</th>
+                            <th>Token</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        <tr>
+                            <td>{{ row[0][:19] if row[0]|length > 19 else row[0] }}</td>
+                            <td>
+                                <span class="event-badge event-{{ row[1] }}">
+                                    {{ row[1] }}
+                                </span>
+                            </td>
+                            <td>{{ row[2] if row[2] else '-' }}</td>
+                            <td>{{ row[3] if row[3] else '-' }}</td>
+                            <td>{{ row[4] if row[4] else '-' }}</td>
+                            <td>{{ row[5] if row[5] else '-' }}</td>
+                            <td>{{ row[6] if row[6] else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-width="2"/>
+                    <polyline points="14 2 14 8 20 8" stroke-width="2"/>
+                    <line x1="16" y1="13" x2="8" y2="13" stroke-width="2"/>
+                    <line x1="16" y1="17" x2="8" y2="17" stroke-width="2"/>
+                    <polyline points="10 9 9 9 8 9" stroke-width="2"/>
+                </svg>
+                <h3>No Activity Yet</h3>
+                <p>The activity ledger is empty</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Count event types
+    function countEvents() {
+        const rows = document.querySelectorAll('#ledgerTable tbody tr');
+        let uploads = 0;
+        let downloads = 0;
+        
+        rows.forEach(row => {
+            const event = row.querySelector('.event-badge').textContent.trim();
+            if (event.includes('UPLOAD')) uploads++;
+            if (event.includes('DOWNLOAD')) downloads++;
+        });
+        
+        const uploadEl = document.getElementById('uploadCount');
+        const downloadEl = document.getElementById('downloadCount');
+        
+        if (uploadEl) uploadEl.textContent = uploads;
+        if (downloadEl) downloadEl.textContent = downloads;
+    }
+    
+    // Filter table
+    function filterTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('ledgerTable');
+        
+        if (!table) return;
+        
+        const rows = table.getElementsByTagName('tr');
+        
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        countEvents();
+    });
+</script>
+{% endblock %}
